@@ -1,0 +1,43 @@
+version: "3.7"
+services:
+  postgres:
+    container_name: fastapi-django-postgres
+    image: postgres:12
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: fastapi
+      POSTGRES_PASSWORD: fastapi
+      POSTGRES_DB: fastapi-django
+    ports:
+      - 5433:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U fastapi  -d fastapi-django" ]
+      interval: 2s
+      retries: 10
+
+  fastapi:
+    container_name: fastapi-django
+    build: ./fastapi
+    volumes:
+      - ./fastapi:/src
+    ports:
+      - 8000:8000
+      - 8001:8001
+    environment:
+      DB_NAME: fastapi-django
+      DB_USER: fastapi
+      DB_PASSWORD: fastapi
+      DB_HOST: postgres
+      DB_PORT: 5432
+    env_file:
+      - fastapi/fastapi.env
+    links:
+      - postgres
+    command: ./scripts/runlocalserver.sh
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
