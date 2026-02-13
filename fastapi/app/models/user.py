@@ -12,9 +12,7 @@ from .base import BaseModelMixin
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
-    def _create_user(
-        self, username: str, email: str, password: str, **extra_fields: dict
-    ) -> "User":
+    def _create_user(self, username: str, email: str, password: str, **extra_fields: dict) -> "User":
         """Create and save a user with the given username, email, and
         password."""
         if not username:
@@ -27,16 +25,12 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_user(  # type: ignore
-        self, username: str, email: str, password: str, **extra_fields
-    ) -> "User":
+    def create_user(self, username: str, email: str, password: str, **extra_fields) -> "User":  # type: ignore
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
         return self._create_user(username, email, password, **extra_fields)
 
-    def create_superuser(  # type: ignore
-        self, username: str, email: str, password: str, **extra_fields
-    ) -> "User":
+    def create_superuser(self, username: str, email: str, password: str, **extra_fields) -> "User":  # type: ignore
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
 

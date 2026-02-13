@@ -87,7 +87,6 @@ class UserAdmin(admin.ModelAdmin):
         return super(UserAdmin, self).get_fieldsets(request, obj)
 
     def get_form(self, request, obj=None, **kwargs):  # type: ignore
-        """Use special form during user creation."""
         defaults = {}
         if obj is None:
             defaults["form"] = self.add_form
@@ -104,9 +103,7 @@ class UserAdmin(admin.ModelAdmin):
 
     def lookup_allowed(self, lookup, value):  # type: ignore
         # Don't allow lookups involving passwords.
-        return not lookup.startswith("password") and super().lookup_allowed(
-            lookup, value
-        )
+        return not lookup.startswith("password") and super().lookup_allowed(lookup, value)
 
     @sensitive_post_parameters_m
     @csrf_protect_m
@@ -203,8 +200,7 @@ class UserAdmin(admin.ModelAdmin):
 
         return TemplateResponse(
             request,
-            self.change_user_password_template
-            or "admin/auth/user/change_password.html",
+            self.change_user_password_template or "admin/auth/user/change_password.html",
             context,
         )
 

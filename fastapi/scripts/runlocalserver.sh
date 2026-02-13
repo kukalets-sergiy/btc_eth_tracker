@@ -1,7 +1,17 @@
 #!/bin/bash
 set -e
 
+echo "Waiting for Postgres..."
+until python manage.py showmigrations >/dev/null 2>&1; do
+  sleep 2
+done
+
 echo "Running migrations..."
+python manage.py makemigrations --noinput
+echo "Waiting for migrations to be ready..."
+until python manage.py makemigrations --check --noinput >/dev/null 2>&1; do
+  sleep 2
+done
 python manage.py migrate
 
 echo "Creating superuser if not exists..."

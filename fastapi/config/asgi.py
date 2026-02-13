@@ -31,17 +31,20 @@ django_app = get_asgi_application()
 """
 FastAPI settings
 """
-from app.routers import auth_router, health_router, user_router
+from app.routers import auth_router, health_router, user_router, block_router, crypto_stat_router
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 fastapi_app = FastAPI()
+API_PREFIX = "/api"
 
 # routers
-fastapi_app.include_router(user_router, tags=["users"], prefix="/user")
-fastapi_app.include_router(auth_router, tags=["auth"], prefix="/auth")
-fastapi_app.include_router(health_router, tags=["health"], prefix="/health")
+fastapi_app.include_router(user_router, tags=["users"], prefix=f"{API_PREFIX}/user")
+fastapi_app.include_router(auth_router, tags=["auth"], prefix=f"{API_PREFIX}/auth")
+fastapi_app.include_router(health_router, tags=["health"], prefix=f"{API_PREFIX}/health")
+fastapi_app.include_router(block_router, tags=["block"], prefix=f"{API_PREFIX}/block")
+fastapi_app.include_router(crypto_stat_router, tags=["crypto-stats"], prefix=f"{API_PREFIX}/crypto/stats")
 
 # to mount Django
 fastapi_app.mount("/django", django_app)

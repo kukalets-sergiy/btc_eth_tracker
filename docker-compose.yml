@@ -1,4 +1,3 @@
-version: "3.7"
 services:
   postgres:
     container_name: fastapi-django-postgres
@@ -20,7 +19,7 @@ services:
     container_name: fastapi-django
     build: ./fastapi
     volumes:
-      - ./fastapi:/src
+      - ./fastapi:/app
     ports:
       - 8000:8000
       - 8001:8001
@@ -38,6 +37,40 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  redis:
+    image: "redis:alpine"
+    ports:
+      - "6379:6379"
+    restart: always
+
+  celery:
+    build: ./fastapi
+    command: >
+      sh -c "celery -A config.celery worker -l INFO --concurrency=4"
+    depends_on:
+      - fastapi
+      - redis
+      - postgres
+    restart: on-failure
+    env_file:
+      - fastapi/fastapi.env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+
+  celery-beat:
+    build: ./fastapi
+    command: >
+      sh -c "celery -A config.celery beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+    depends_on:
+      - fastapi
+      - redis
+      - postgres
+    restart: on-failure
+    env_file:
+      - fastapi/fastapi.env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
 
 volumes:
   postgres_data:

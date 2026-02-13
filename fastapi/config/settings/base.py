@@ -26,9 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv(
-    "SECRET_KEY", "django-insecure-fhlhgdi%#x+-w-8wdm1v1a&kbqgqg2vgy5+)$fxe6l@k=9qq2_"
-)
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-fhlhgdi%#x+-w-8wdm1v1a&kbqgqg2vgy5+)$fxe6l@k=9qq2_")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -45,7 +43,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "app.apps.AppConfig",
+    "django_celery_beat",
+    "rest_framework",
+    "app",
 ]
 
 MIDDLEWARE = [
@@ -112,9 +112,15 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 STATIC_URL = "/static/"
 
-# Media files
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
+
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+CELERY_TIMEZONE = "Europe/Kyiv"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

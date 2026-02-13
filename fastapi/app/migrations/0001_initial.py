@@ -21,9 +21,7 @@ class Migration(migrations.Migration):
                 ("password", models.CharField(max_length=128, verbose_name="password")),
                 (
                     "last_login",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="last login"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="last login"),
                 ),
                 (
                     "uuid",
@@ -36,21 +34,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "created_at",
-                    models.DateTimeField(
-                        auto_now_add=True, db_index=True, verbose_name="created_at"
-                    ),
+                    models.DateTimeField(auto_now_add=True, db_index=True, verbose_name="created_at"),
                 ),
                 (
                     "updated_at",
-                    models.DateTimeField(
-                        auto_now=True, db_index=True, verbose_name="updated_at"
-                    ),
+                    models.DateTimeField(auto_now=True, db_index=True, verbose_name="updated_at"),
                 ),
                 (
                     "email",
-                    models.EmailField(
-                        max_length=254, unique=True, verbose_name="email address"
-                    ),
+                    models.EmailField(max_length=254, unique=True, verbose_name="email address"),
                 ),
                 ("username", models.CharField(max_length=20, verbose_name="username")),
                 ("is_active", models.BooleanField(default=True)),

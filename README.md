@@ -1,35 +1,82 @@
-# FastAPI with Django ORM and Admin
+# BTC / ETH Tracker  
+FastAPI + Django ORM + Django Admin (mounted inside FastAPI)
 
-## Overview
+The application stores and exposes latest BTC and ETH data.
+
+- **BTC provider:** Blockstream  
+- **ETH provider:** Blockchair  
+- **Stats:** CoinMarketCap (free tier does not provide block number)
+
+---
+
+## Requirements
+
+- Python 3.10+
+- Poetry
+- Docker + Docker Compose
+
+---
+
+## Run
+
+```bash
+git clone https://github.com/kukalets-sergiy/btc_eth_tracker.git
+cd btc_eth_tracker
+cp fastapi/fastapi.env.tmpl fastapi/fastapi.env
+```
+Local Development (without Docker)
+
+```bash
+python -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+poetry install
+chmod +x scripts/lock.sh
+bash scripts/lock.sh
+poetry install --no-root
+cp fastapi/fastapi.env.tmpl fastapi/fastapi.env
+```
+
+```bash
+docker compose up --build
+```
+
+Services
+FastAPI → http://localhost:8000
 
 
-## Prerequisites
+Django Admin → http://localhost:8001/admin
 
-### Poetry
+Default Admin User
+Email: admin@example.com
 
-Dependency management for Python files is done using POETRY.
+Password: Admin123
 
-1. <https://python-poetry.org/docs/#installation>
-1. `python -m venv venv`
-1. `source venv/bin/activate`
-2. `pip install --upgrade pip` (if needed)
-3. `poetry install`
-4. `poetry lock`
-5. `poetry install --no-root`
+API Endpoints
+Auth
+POST /api/auth/login
 
-### pre-commit (for developers)
+Users
+GET /api/user/
 
-This tool defines commands to be executed before committing. It is already defined in `.pre-commit-config.yaml`, so you need to configure it in your environment. Please follow the steps below.
+Registraton
+POST /api/user/
 
-1. <https://pre-commit.com/#installation>
-1. `pre-commit install`
+Health
+GET /api/health/
 
-## Usage
+Blocks
+GET /api/block/blocks
 
-1. Clone this repository
+GET /api/block/block
 
-   ```sh
-    git clone https://github.com/kukalets-sergiy/btc_eth_tracker/tree/dev
-    ```
+GET /api/block/providers
 
-1. Create fastapi.env with reference to fastapi.env.tmpl
+Crypto Stats
+GET /api/crypto/stats/
+
+GET /api/crypto/stats/latest
+
+Background Tasks
+Celery worker + beat fetch BTC/ETH data every minute and store it in DB.
+Duplicates are prevented.

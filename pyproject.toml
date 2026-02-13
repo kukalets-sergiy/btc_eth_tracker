@@ -2,7 +2,7 @@
 name = "fastapi-django"
 version = "0.1.0"
 description = ""
-authors = ["kathmandu777 <mahhakatomanato@gmail.com>"]
+authors = ["sergiy <kukaletssergiy@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"

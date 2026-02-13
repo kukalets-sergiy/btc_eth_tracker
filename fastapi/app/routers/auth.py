@@ -1,14 +1,11 @@
 from app.api import AuthAPI
-from app.schemas import Token
+from app.schemas import Token, LoginSchema
 
-from fastapi import APIRouter, Depends, Request
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi import APIRouter
 
 auth_router = APIRouter()
 
 
 @auth_router.post("/login", response_model=Token)
-async def login(
-    request: Request, form_data: OAuth2PasswordRequestForm = Depends()
-) -> dict[str, str]:
-    return await AuthAPI.login(request, form_data)
+async def login(data: LoginSchema):
+    return await AuthAPI.login(data)

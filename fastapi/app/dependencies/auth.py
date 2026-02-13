@@ -3,21 +3,29 @@ from config.exceptions import InvalidTokenException
 from config.jwt import jwt_decode_handler
 from jose import JWTError
 
-from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+from fastapi import Depends, HTTPException, Security
+from fastapi.security import HTTPAuthorizationCredentials
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+from fastapi.security import HTTPBearer
+
+security = HTTPBearer()
+
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Security(security),
+) -> User:
+    token = credentials.credentials
+
     try:
         payload = jwt_decode_handler(token)
     except JWTError:
         raise InvalidTokenException()
 
-    user = await User.objects.filter(uuid=payload.get("sub", "")).afirst()
+    user = await User.objects.filter(uuid=payload.get("sub")).afirst()
     if not user:
         raise InvalidTokenException()
+
     return user
 
 

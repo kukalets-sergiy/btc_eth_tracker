@@ -14,9 +14,7 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {
-            "format": '%(asctime)s [%(levelname)s] %(pathname)s:%(lineno)d "%(message)s"'
-        },
+        "verbose": {"format": '%(asctime)s [%(levelname)s] %(pathname)s:%(lineno)d "%(message)s"'},
         "simple": {"format": "%(levelname)s %(message)s"},
     },
     "filters": {},
@@ -61,7 +59,7 @@ LOGGING = {
         },
         "django": {
             "handlers": ["file"],
-            "level": "WARNING",  # DEBUGにするとSQLログが出力される
+            "level": "WARNING",
             "propagate": False,
         },
         "django.security.csrf": {
