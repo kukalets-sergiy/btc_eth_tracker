@@ -33,7 +33,6 @@ pip install --upgrade pip
 chmod +x fastapi/scripts/lock.sh
 bash fastapi/scripts/lock.sh
 poetry install --no-root
-cp fastapi/fastapi.env.tmpl fastapi/fastapi.env
 ```
 
 ```bash
@@ -41,7 +40,7 @@ docker compose up --build
 ```
 
 Services
-FastAPI → http://localhost:8000
+FastAPI → http://localhost:8000/docs
 
 
 Django Admin → http://localhost:8001/admin
