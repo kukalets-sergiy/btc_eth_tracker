@@ -30,9 +30,8 @@ Local Development (without Docker)
 python -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
-poetry install
-chmod +x scripts/lock.sh
-bash scripts/lock.sh
+chmod +x fastapi/scripts/lock.sh
+bash fastapi/scripts/lock.sh
 poetry install --no-root
 cp fastapi/fastapi.env.tmpl fastapi/fastapi.env
 ```
@@ -80,3 +79,15 @@ GET /api/crypto/stats/latest
 Background Tasks
 Celery worker + beat fetch BTC/ETH data every minute and store it in DB.
 Duplicates are prevented.
+
+We can also observe the results in the admin panel.
+App/Blocks
+App/Currency statss
+
+#### I would like to note that the provided platforms do not work correctly for free use. 
+#### CoinMarketCap does not return the block.
+#### Blockchair returns the last block for 2025.
+
+#### Therefore, for this task, I added Blockstream for BTC, which alternates with Blockstream for ETH.
+
+#### I made a separate model for CoinMarketCap. Data is collected in real time in Currency stats.
