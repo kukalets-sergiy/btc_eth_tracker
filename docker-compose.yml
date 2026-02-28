@@ -1,7 +1,7 @@
 services:
   postgres:
     container_name: fastapi-django-postgres
-    image: postgres:12
+    image: postgres:15
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
@@ -17,12 +17,11 @@ services:
 
   fastapi:
     container_name: fastapi-django
-    build: ./fastapi
+    build: .
     volumes:
-      - ./fastapi:/app
+      - .:/app
     ports:
       - 8000:8000
-      - 8001:8001
     environment:
       DB_NAME: fastapi-django
       DB_USER: fastapi
@@ -30,9 +29,7 @@ services:
       DB_HOST: postgres
       DB_PORT: 5432
     env_file:
-      - fastapi/fastapi.env
-    links:
-      - postgres
+      - fastapi.env
     command: ./scripts/runlocalserver.sh
     depends_on:
       postgres:
@@ -40,37 +37,39 @@ services:
 
   redis:
     image: "redis:alpine"
-    ports:
-      - "6379:6379"
     restart: always
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 2s
+      retries: 10
 
   celery:
-    build: ./fastapi
+    build: .
     command: >
-      sh -c "celery -A config.celery worker -l INFO --concurrency=4"
+      sh -c "celery -A configurations.celery worker -l INFO --concurrency=4"
     depends_on:
       - fastapi
       - redis
       - postgres
-    restart: on-failure
+    restart: always
     env_file:
-      - fastapi/fastapi.env
+      - fastapi.env
     environment:
-      DJANGO_SETTINGS_MODULE: config.settings.local
+      DJANGO_SETTINGS_MODULE: configurations.settings.local
 
   celery-beat:
-    build: ./fastapi
+    build: .
     command: >
-      sh -c "celery -A config.celery beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+      sh -c "celery -A configurations.celery beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
     depends_on:
       - fastapi
       - redis
       - postgres
-    restart: on-failure
+    restart: always
     env_file:
-      - fastapi/fastapi.env
+      - fastapi.env
     environment:
-      DJANGO_SETTINGS_MODULE: config.settings.local
+      DJANGO_SETTINGS_MODULE: configurations.settings.local
 
 volumes:
   postgres_data:

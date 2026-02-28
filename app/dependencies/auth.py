@@ -1,6 +1,6 @@
 from app.models import User
-from config.exceptions import InvalidTokenException
-from config.jwt import jwt_decode_handler
+from configurations.exceptions import InvalidTokenException
+from configurations.jwt import jwt_decode_handler
 from jose import JWTError
 
 from fastapi import Depends, HTTPException, Security
