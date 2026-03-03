@@ -1,0 +1,110 @@
+services:
+  postgres:
+    container_name: fastapi-django-postgres
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: fastapi
+      POSTGRES_PASSWORD: fastapi
+      POSTGRES_DB: fastapi-django
+    ports:
+      - 5433:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U fastapi  -d fastapi-django" ]
+      interval: 2s
+      retries: 10
+
+  fastapi:
+    container_name: fastapi-django
+    build:
+      context: ./app
+      dockerfile: Dockerfile.prod
+    image: 080916540610.dkr.ecr.eu-north-1.amazonaws.com/fastapi-django-ec2:fastapi
+    environment:
+      DB_NAME: fastapi-django
+      DB_USER: fastapi
+      DB_PASSWORD: fastapi
+      DB_HOST: postgres
+      DB_PORT: 5432
+
+    env_file:
+      - .env.prod
+    command: chmod +x ./scripts/runprodserver.prod.sh && ./scripts/runprodserver.prod.sh
+    expose:
+      - 8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  redis:
+    image: "redis:alpine"
+    restart: always
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 2s
+      retries: 10
+
+  celery:
+    image: 080916540610.dkr.ecr.eu-north-1.amazonaws.com/fastapi-django-ec2:fastapi
+    command: >
+      sh -c "celery -A configurations.celery worker -l INFO --concurrency=4"
+    depends_on:
+      - fastapi
+      - redis
+      - postgres
+    restart: always
+    env_file:
+      - .env.prod
+    environment:
+      DJANGO_SETTINGS_MODULE: configurations.settings.production
+
+  celery-beat:
+    image: 080916540610.dkr.ecr.eu-north-1.amazonaws.com/fastapi-django-ec2:fastapi
+    command: >
+      sh -c "celery -A configurations.celery beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+    depends_on:
+      - fastapi
+      - redis
+      - postgres
+    restart: always
+    env_file:
+      - .env.prod
+    environment:
+      DJANGO_SETTINGS_MODULE: configurations.settings.production
+
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - static_volume:/app/staticfiles
+      - media_volume:/app/mediafiles
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - html:/usr/share/nginx/html
+      - vhost:/etc/nginx/vhost.d
+
+  acme-companion:
+    image: nginxproxy/acme-companion
+    env_file:
+      - .env.prod.proxy-companion
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - html:/usr/share/nginx/html
+      - vhost:/etc/nginx/vhost.d
+      - acme:/etc/acme.sh
+    depends_on:
+      - nginx-proxy
+
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  certs:
+  vhost:
+  html:
+  acme:
