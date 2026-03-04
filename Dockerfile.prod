@@ -2,24 +2,51 @@ FROM python:3.11-slim
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONPATH=/app
 
-RUN mkdir -p /home/app/staticfiles /home/app/mediafiles
-WORKDIR /app
+# Створюємо робочу директорію
+WORKDIR /home/app
 
-RUN apt update && apt install -y \
-    gcc \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Системні залежності
+RUN apt update && apt install -y gcc libpq-dev && rm -rf /var/lib/apt/lists/*
 
-RUN pip install poetry
+# Встановлюємо poetry
+RUN pip install --no-cache-dir poetry
 
-RUN addgroup --system app && adduser --system --ingroup app app
-USER app
-
+# Копіюємо тільки залежності і встановлюємо
 COPY pyproject.toml poetry.lock ./
+RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-root
 
-RUN poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-root
 
-COPY . /app/
+
+# create directory for the app user
+RUN mkdir -p /home/app
+
+# create the app user
+RUN groupadd -r app && useradd -r -g app app
+
+# create the appropriate directories
+
+ENV APP_HOME=/home/app
+RUN mkdir -p $APP_HOME/staticfiles \
+             $APP_HOME/mediafiles \
+             $APP_HOME/scripts
+WORKDIR $APP_HOME
+
+# copy entrypoint correctly
+COPY ./scripts/runprodserver.sh $APP_HOME/scripts/
+RUN sed -i 's/\r$//g' $APP_HOME/scripts/runprodserver.sh \
+    && chmod +x $APP_HOME/scripts/runprodserver.sh
+
+# copy project
+COPY . $APP_HOME
+
+# chown all the files to the app user
+RUN chown -R app:app $APP_HOME
+
+# change to the app user
+USER app
+RUN chown -R app:app $APP_HOME/staticfiles
+RUN chown -R app:app $APP_HOME/mediafiles
+
+# run runprodserver.sh
+ENTRYPOINT ["/home/app/scripts/runprodserver.sh"]

@@ -18,7 +18,7 @@ services:
   fastapi:
     container_name: fastapi-django
     build:
-      context: ./app
+      context: .
       dockerfile: Dockerfile.prod
     image: 080916540610.dkr.ecr.eu-north-1.amazonaws.com/fastapi-django-ec2:fastapi
     environment:
@@ -30,7 +30,7 @@ services:
 
     env_file:
       - .env.prod
-    command: chmod +x ./scripts/runprodserver.prod.sh && ./scripts/runprodserver.prod.sh
+    command: chmod +x ./scripts/runprodserver.sh && ./scripts/runprodserver.sh
     expose:
       - 8000
     depends_on:

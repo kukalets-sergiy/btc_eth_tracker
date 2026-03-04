@@ -8,6 +8,8 @@ services:
       POSTGRES_USER: fastapi
       POSTGRES_PASSWORD: fastapi
       POSTGRES_DB: fastapi-django
+    env_file:
+      - ./.env.prod
     ports:
       - 5433:5432
     healthcheck:
@@ -18,19 +20,17 @@ services:
   fastapi:
     container_name: fastapi-django
     build:
-      context: ./app
+      context: .
       dockerfile: Dockerfile.prod
     image: 080916540610.dkr.ecr.eu-north-1.amazonaws.com/fastapi-django-ec2:fastapi
     environment:
-      DB_NAME: fastapi-django
-      DB_USER: fastapi
-      DB_PASSWORD: fastapi
-      DB_HOST: postgres
-      DB_PORT: 5432
-
+        POSTGRES_USER: fastapi
+        POSTGRES_PASSWORD: fastapi
+        POSTGRES_DB: fastapi-django
+        POSTGRES_HOST: postgres
+        POSTGRES_PORT: 5432
     env_file:
-      - .env.prod
-    command: chmod +x ./scripts/runprodserver.prod.sh && ./scripts/runprodserver.prod.sh
+      - ./.env.prod
     expose:
       - 8000
     depends_on:
@@ -45,33 +45,33 @@ services:
       interval: 2s
       retries: 10
 
-  celery:
-    image: 080916540610.dkr.ecr.eu-north-1.amazonaws.com/fastapi-django-ec2:fastapi
-    command: >
-      sh -c "celery -A configurations.celery worker -l INFO --concurrency=4"
-    depends_on:
-      - fastapi
-      - redis
-      - postgres
-    restart: always
-    env_file:
-      - .env.prod
-    environment:
-      DJANGO_SETTINGS_MODULE: configurations.settings.production
+#  celery:
+#    image: 080916540610.dkr.ecr.eu-north-1.amazonaws.com/fastapi-django-ec2:fastapi
+#    command: >
+#      sh -c "celery -A configurations.celery worker -l INFO --concurrency=4"
+#    depends_on:
+#      - fastapi
+#      - redis
+#      - postgres
+#    restart: always
+#    env_file:
+#      - .env.prod
+#    environment:
+#      DJANGO_SETTINGS_MODULE: configurations.settings.production
 
-  celery-beat:
-    image: 080916540610.dkr.ecr.eu-north-1.amazonaws.com/fastapi-django-ec2:fastapi
-    command: >
-      sh -c "celery -A configurations.celery beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
-    depends_on:
-      - fastapi
-      - redis
-      - postgres
-    restart: always
-    env_file:
-      - .env.prod
-    environment:
-      DJANGO_SETTINGS_MODULE: configurations.settings.production
+#  celery-beat:
+#    image: 080916540610.dkr.ecr.eu-north-1.amazonaws.com/fastapi-django-ec2:fastapi
+#    command: >
+#      sh -c "celery -A configurations.celery beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler"
+#    depends_on:
+#      - fastapi
+#      - redis
+#      - postgres
+#    restart: always
+#    env_file:
+#      - .env.prod
+#    environment:
+#      DJANGO_SETTINGS_MODULE: configurations.settings.production
 
   nginx-proxy:
     image: nginxproxy/nginx-proxy
@@ -90,7 +90,7 @@ services:
   acme-companion:
     image: nginxproxy/acme-companion
     env_file:
-      - .env.prod.proxy-companion
+      - ./.env.prod.proxy-companion
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - certs:/etc/nginx/certs
