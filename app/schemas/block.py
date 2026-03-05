@@ -11,6 +11,7 @@ class BlockOutSchema(BaseModel):
     created_at: datetime
     stored_at: datetime
 
+    model_config = ConfigDict(from_attributes=True)
 
 class ProviderOutSchema(BaseModel):
     uuid: UUID

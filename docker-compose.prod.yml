@@ -74,8 +74,9 @@ services:
 #      DJANGO_SETTINGS_MODULE: configurations.settings.production
 
   nginx-proxy:
-    image: nginxproxy/nginx-proxy
     container_name: nginx-proxy
+    build: nginx
+    image: 080916540610.dkr.ecr.eu-north-1.amazonaws.com/fastapi-django-ec2:nginx-proxy
     ports:
       - "80:80"
       - "443:443"
